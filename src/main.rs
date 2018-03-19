@@ -30,7 +30,27 @@ struct Grid {
     squares: Vec<Square>,
 }
 
+enum Direction {
+    West,
+    East,
+    North,
+    South,
+}
+
+#[derive(PartialEq, Debug)]
+enum MovementError {
+    NoBeingInSquare,
+}
+
 impl Grid {
+    fn move_being_in_coord(&self, coord: (usize, usize), dir: Direction) -> Result<(usize, usize), MovementError> {
+        let square = self.squares.get(coord.0 * self.size.0 + coord.1).expect("index out of bounds trying to get beeing");
+        match square.beings {
+            Some (_) => Ok((0,0)),
+            None => Err(MovementError::NoBeingInSquare),
+        }
+    }
+
     fn generate_empty(size_x: usize, size_y: usize) -> Grid {
         let number_of_squares = size_x * size_y;
         let mut squares: Vec<Square> =
@@ -72,5 +92,11 @@ mod tests {
 
         assert_eq!(grid.squares.len(), 5*13);
         assert_eq!(number_of_squares, 5*13);
+    }
+
+    #[test]
+    fn test_move_being_without_beging_in_square() {
+        let grid = ::Grid::generate_empty(3, 3);
+        assert_eq!(grid.move_being_in_coord((0,0), ::Direction::West), Err(::MovementError::NoBeingInSquare));
     }
 }
